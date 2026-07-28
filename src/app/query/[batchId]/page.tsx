@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { loadBatch, decodeDataFromUrl } from '@/lib/storage';
+import { fetchBatchFromServer } from '@/lib/storage';
 import type { BatchData, RepaymentRecord } from '@/lib/types';
 
 export default function QueryPage() {
@@ -16,21 +16,10 @@ export default function QueryPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 优先从 URL hash 中读取数据（跨浏览器场景）
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      const data = decodeDataFromUrl(hash);
-      if (data) {
-        setBatch(data);
-        setIsLoading(false);
-        return;
-      }
-    }
-
-    // 回退到 localStorage（同浏览器场景）
-    const data = loadBatch(batchId);
-    setBatch(data);
-    setIsLoading(false);
+    fetchBatchFromServer(batchId).then((data) => {
+      setBatch(data);
+      setIsLoading(false);
+    });
   }, [batchId]);
 
   const matchedRecords = useMemo(() => {

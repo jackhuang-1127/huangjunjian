@@ -1,5 +1,4 @@
 import type { BatchData } from './types';
-import LZString from 'lz-string';
 
 const STORAGE_PREFIX = 'repayment_batch_';
 
@@ -23,17 +22,25 @@ export function generateBatchId(): string {
   return `batch_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 }
 
-export function encodeDataToUrl(batch: BatchData): string {
-  const json = JSON.stringify(batch);
-  const compressed = LZString.compressToEncodedURIComponent(json);
-  return compressed;
+export async function uploadBatchToServer(batch: BatchData): Promise<boolean> {
+  try {
+    const response = await fetch('/api/batches', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(batch),
+    });
+    const result = await response.json();
+    return result.success === true;
+  } catch {
+    return false;
+  }
 }
 
-export function decodeDataFromUrl(encoded: string): BatchData | null {
+export async function fetchBatchFromServer(batchId: string): Promise<BatchData | null> {
   try {
-    const json = LZString.decompressFromEncodedURIComponent(encoded);
-    if (!json) return null;
-    return JSON.parse(json) as BatchData;
+    const response = await fetch(`/api/batches/${batchId}`);
+    if (!response.ok) return null;
+    return await response.json();
   } catch {
     return null;
   }

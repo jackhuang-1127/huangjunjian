@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { parseExcelFile } from '@/lib/excel-parser';
-import { saveBatch, generateBatchId, encodeDataToUrl } from '@/lib/storage';
+import { generateBatchId, uploadBatchToServer } from '@/lib/storage';
 import type { BatchData, ParseResult } from '@/lib/types';
 import QRCode from 'qrcode';
 
@@ -15,10 +15,9 @@ export default function AdminPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const generateQR = useCallback(async (batchData: BatchData) => {
+  const generateQR = useCallback(async (batchId: string) => {
     const domain = process.env.NEXT_PUBLIC_DOMAIN || window.location.origin;
-    const encoded = encodeDataToUrl(batchData);
-    const queryUrl = `${domain}/query/${batchData.id}#${encoded}`;
+    const queryUrl = `${domain}/query/${batchId}`;
     try {
       const url = await QRCode.toDataURL(queryUrl, {
         width: 280,
@@ -64,10 +63,17 @@ export default function AdminPage() {
           fileName: file.name,
         };
 
-        saveBatch(batchData);
+        // 上传到服务端
+        const uploaded = await uploadBatchToServer(batchData);
+        if (!uploaded) {
+          setError('数据上传失败，请重试');
+          setIsUploading(false);
+          return;
+        }
+
         setBatch(batchData);
         setParseResult(result);
-        await generateQR(batchData);
+        await generateQR(batchId);
       } catch (err) {
         setError(err instanceof Error ? err.message : '文件解析失败');
       } finally {
@@ -105,12 +111,6 @@ export default function AdminPage() {
     setError('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
-
-  useEffect(() => {
-    if (batch) {
-      generateQR(batch);
-    }
-  }, [batch, generateQR]);
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
@@ -155,7 +155,7 @@ export default function AdminPage() {
             {isUploading ? (
               <div className="flex flex-col items-center gap-3">
                 <div className="w-10 h-10 border-[3px] border-blue-200 border-t-blue-800 rounded-full animate-spin" />
-                <p className="text-sm text-slate-600">正在解析文件...</p>
+                <p className="text-sm text-slate-600">正在解析并上传...</p>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
@@ -248,8 +248,8 @@ export default function AdminPage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={qrDataUrl} alt="查询二维码" width={280} height={280} />
                 </div>
-                <p className="text-xs text-slate-400 mt-3 break-all">
-                  数据已编码到二维码中，扫码即可访问
+                <p className="text-xs text-slate-400 mt-3">
+                  二维码链接：/query/{batch.id}
                 </p>
               </div>
             )}
