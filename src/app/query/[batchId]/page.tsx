@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { loadBatch } from '@/lib/storage';
+import { loadBatch, decodeDataFromUrl } from '@/lib/storage';
 import type { BatchData, RepaymentRecord } from '@/lib/types';
 
 export default function QueryPage() {
@@ -16,6 +16,18 @@ export default function QueryPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // 优先从 URL hash 中读取数据（跨浏览器场景）
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const data = decodeDataFromUrl(hash);
+      if (data) {
+        setBatch(data);
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // 回退到 localStorage（同浏览器场景）
     const data = loadBatch(batchId);
     setBatch(data);
     setIsLoading(false);
@@ -59,7 +71,7 @@ export default function QueryPage() {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-blue-200 border-t-blue-800 rounded-full animate-spin" />
+          <div className="w-10 h-10 border-[3px] border-blue-200 border-t-blue-800 rounded-full animate-spin" />
           <p className="text-sm text-slate-500">加载中...</p>
         </div>
       </div>

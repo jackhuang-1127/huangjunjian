@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { parseExcelFile } from '@/lib/excel-parser';
-import { saveBatch, generateBatchId } from '@/lib/storage';
+import { saveBatch, generateBatchId, encodeDataToUrl } from '@/lib/storage';
 import type { BatchData, ParseResult } from '@/lib/types';
 import QRCode from 'qrcode';
 
@@ -15,9 +15,10 @@ export default function AdminPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const generateQR = useCallback(async (batchId: string) => {
+  const generateQR = useCallback(async (batchData: BatchData) => {
     const domain = process.env.NEXT_PUBLIC_DOMAIN || window.location.origin;
-    const queryUrl = `${domain}/query/${batchId}`;
+    const encoded = encodeDataToUrl(batchData);
+    const queryUrl = `${domain}/query/${batchData.id}#${encoded}`;
     try {
       const url = await QRCode.toDataURL(queryUrl, {
         width: 280,
@@ -66,7 +67,7 @@ export default function AdminPage() {
         saveBatch(batchData);
         setBatch(batchData);
         setParseResult(result);
-        await generateQR(batchId);
+        await generateQR(batchData);
       } catch (err) {
         setError(err instanceof Error ? err.message : '文件解析失败');
       } finally {
@@ -107,7 +108,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (batch) {
-      generateQR(batch.id);
+      generateQR(batch);
     }
   }, [batch, generateQR]);
 
@@ -153,7 +154,7 @@ export default function AdminPage() {
             />
             {isUploading ? (
               <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-3 border-blue-200 border-t-blue-800 rounded-full animate-spin" />
+                <div className="w-10 h-10 border-[3px] border-blue-200 border-t-blue-800 rounded-full animate-spin" />
                 <p className="text-sm text-slate-600">正在解析文件...</p>
               </div>
             ) : (
@@ -247,8 +248,8 @@ export default function AdminPage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={qrDataUrl} alt="查询二维码" width={280} height={280} />
                 </div>
-                <p className="text-xs text-slate-400 mt-3">
-                  二维码链接：/query/{batch.id}
+                <p className="text-xs text-slate-400 mt-3 break-all">
+                  数据已编码到二维码中，扫码即可访问
                 </p>
               </div>
             )}
