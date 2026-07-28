@@ -26,10 +26,9 @@ export default function QueryPage() {
     if (!batch || !searchName.trim()) return [];
     const keyword = searchName.trim().toLowerCase();
 
+    // 仅支持借款人查询
     return batch.records.filter((record: RepaymentRecord) => {
-      if (record.borrowerName.toLowerCase().includes(keyword)) return true;
-      const insuredList = record.insuredNames.split(/[,，]/);
-      return insuredList.some((name: string) => name.trim().toLowerCase().includes(keyword));
+      return record.borrowerName.toLowerCase().includes(keyword);
     });
   }, [batch, searchName]);
 
@@ -107,7 +106,7 @@ export default function QueryPage() {
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="请输入借款人或被保险企业名称"
+              placeholder="请输入借款人企业名称"
               className="flex-1 px-3 py-2.5 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
             />
             <button
@@ -222,6 +221,11 @@ export default function QueryPage() {
                         {formatMoney(record.totalAmount)}
                       </span>
                     </div>
+                    {record.insuredNames && (
+                      <div className="text-xs text-slate-600 mb-1">
+                        <span className="text-slate-400">被保险人：</span>{record.insuredNames}
+                      </div>
+                    )}
                     <div className="flex gap-4 text-xs text-slate-500">
                       <span>本金: {formatMoney(record.principal)}</span>
                       <span>利息: {formatMoney(record.interest)}</span>
