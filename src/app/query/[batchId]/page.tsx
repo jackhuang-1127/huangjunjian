@@ -133,6 +133,30 @@ export default function QueryPage() {
               </p>
             </div>
 
+            {/* Account Info Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                还款账户信息
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex items-start">
+                  <span className="text-xs text-slate-500 w-16 shrink-0">还款户名</span>
+                  <span className="text-sm text-slate-900 font-medium">{matchedRecords[0].borrowerName}</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-xs text-slate-500 w-16 shrink-0">账号</span>
+                  <span className="text-sm text-slate-900 font-medium tabular-nums">{matchedRecords[0].repaymentAccount || '-'}</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="text-xs text-slate-500 w-16 shrink-0">开户行</span>
+                  <span className="text-sm text-slate-900 font-medium">宁波银行股份有限公司</span>
+                </div>
+              </div>
+            </div>
+
             {/* Table */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="overflow-x-auto">
