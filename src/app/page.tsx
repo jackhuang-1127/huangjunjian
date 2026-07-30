@@ -217,12 +217,6 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="text-xs text-slate-400">
-                <p>文件：{batch.fileName}</p>
-                <p>上传时间：{new Date(batch.createdAt).toLocaleString('zh-CN')}</p>
-                <p>批次号：{batch.id}</p>
-              </div>
-
               {parseResult.errors.length > 0 && (
                 <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
                   <p className="text-xs font-medium text-amber-700 mb-1">
@@ -247,6 +241,12 @@ export default function AdminPage() {
                 <div className="inline-block p-4 bg-white rounded-xl border border-slate-100 shadow-sm">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={qrDataUrl} alt="查询二维码" width={280} height={280} />
+                </div>
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <p className="text-sm text-slate-600 font-medium">{batch.fileName}</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    上传时间：{new Date(batch.createdAt).toLocaleString('zh-CN')}
+                  </p>
                 </div>
                 <p className="text-xs text-slate-400 mt-3">
                   二维码链接：/query/{batch.id}
