@@ -90,6 +90,9 @@ export default function QueryPage() {
       <header className="bg-blue-800 text-white">
         <div className="max-w-lg mx-auto px-4 py-5">
           <h1 className="text-lg font-bold">还款计划查询</h1>
+          {batch.fileName && (
+            <p className="text-blue-200 text-xs mt-1">数据来源：{batch.fileName}</p>
+          )}
           <p className="text-blue-200 text-xs mt-1">请输入企业名称查询您的还款计划</p>
         </div>
       </header>
