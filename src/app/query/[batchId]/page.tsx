@@ -10,6 +10,8 @@ export default function QueryPage() {
   const batchId = params.batchId as string;
 
   const [batch, setBatch] = useState<BatchData | null>(null);
+  const [fileName, setFileName] = useState<string>('');
+  const [createdAt, setCreatedAt] = useState<string>('');
   const [searchName, setSearchName] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [notFound, setNotFound] = useState(false);
@@ -17,7 +19,11 @@ export default function QueryPage() {
 
   useEffect(() => {
     fetchBatchFromServer(batchId).then((data) => {
-      setBatch(data);
+      if (data) {
+        setBatch(data);
+        setFileName(data.fileName || '');
+        setCreatedAt(data.createdAt || '');
+      }
       setIsLoading(false);
     });
   }, [batchId]);
@@ -55,6 +61,22 @@ export default function QueryPage() {
     return value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
@@ -87,182 +109,146 @@ export default function QueryPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       {/* Header */}
-      <header className="bg-blue-800 text-white">
-        <div className="max-w-lg mx-auto px-4 py-5">
-          <h1 className="text-lg font-bold">还款计划查询</h1>
-          {batch.fileName && (
-            <p className="text-blue-200 text-xs mt-1">数据来源：{batch.fileName}</p>
-          )}
-          <p className="text-blue-200 text-xs mt-1">请输入企业名称查询您的还款计划</p>
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <h1 className="text-base font-bold text-slate-900">还款计划查询</h1>
+          <span className="text-xs text-slate-400">共 {batch.records.length} 条记录</span>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-lg mx-auto px-4 py-6">
-        {/* Search */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4">
+      {/* File Info */}
+      {(fileName || createdAt) && (
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <div className="bg-blue-50 rounded-lg p-3 text-sm">
+            {fileName && (
+              <div className="flex items-center gap-2 text-slate-700">
+                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="font-medium">{fileName}</span>
+              </div>
+            )}
+            {createdAt && (
+              <div className="flex items-center gap-2 text-slate-500 mt-1">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{formatDate(createdAt)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Search */}
+      <div className="max-w-2xl mx-auto px-4 py-4">
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
           <label className="block text-sm font-medium text-slate-700 mb-2">
-            企业名称
+            输入借款人姓名查询
           </label>
           <div className="flex gap-2">
             <input
               type="text"
               value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
+              onChange={(e) => {
+                setSearchName(e.target.value);
+                setHasSearched(false);
+                setNotFound(false);
+              }}
               onKeyDown={handleKeyDown}
-              placeholder="请输入借款人企业名称"
-              className="flex-1 px-3 py-2.5 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+              placeholder="请输入借款人姓名"
+              className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button
               onClick={handleSearch}
-              disabled={!searchName.trim()}
-              className="px-5 py-2.5 rounded-lg bg-blue-800 text-white text-sm font-medium hover:bg-blue-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+              className="px-4 py-2 bg-[#1e40af] text-white text-sm font-medium rounded-lg hover:bg-blue-900 transition-colors"
             >
               查询
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Results */}
-        {hasSearched && !notFound && matchedRecords.length > 0 && (
-          <div className="space-y-4">
-            {/* Info Banner */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center gap-2">
-              <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-sm text-blue-800">
-                共找到 <span className="font-bold">{matchedRecords.length}</span> 条还款记录
-              </p>
-            </div>
-
-            {/* Account Info Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-              <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+      {/* Results */}
+      {hasSearched && (
+        <div className="max-w-2xl mx-auto px-4 pb-8">
+          {notFound ? (
+            <div className="bg-white rounded-xl p-8 text-center shadow-sm border border-slate-100">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>
-                还款账户信息
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex items-start">
-                  <span className="text-xs text-slate-500 w-16 shrink-0">还款户名</span>
-                  <span className="text-sm text-slate-900 font-medium">{matchedRecords[0].borrowerName}</span>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-xs text-slate-500 w-16 shrink-0">账号</span>
-                  <span className="text-sm text-slate-900 font-medium tabular-nums">{matchedRecords[0].repaymentAccount || '-'}</span>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-xs text-slate-500 w-16 shrink-0">开户行</span>
-                  <span className="text-sm text-slate-900 font-medium">宁波银行股份有限公司</span>
-                </div>
               </div>
+              <p className="text-sm text-slate-600">未找到该借款人的还款记录</p>
+              <p className="text-xs text-slate-400 mt-1">请检查姓名是否正确</p>
             </div>
-
-            {/* Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="text-left px-3 py-3 font-semibold text-slate-700 whitespace-nowrap">应还日期</th>
-                      <th className="text-right px-3 py-3 font-semibold text-slate-700 whitespace-nowrap">应还本金</th>
-                      <th className="text-right px-3 py-3 font-semibold text-slate-700 whitespace-nowrap">应还利息</th>
-                      <th className="text-right px-3 py-3 font-semibold text-slate-700 whitespace-nowrap">合计应还</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {matchedRecords.map((record: RepaymentRecord, index: number) => (
-                      <tr
-                        key={index}
-                        className="border-b border-slate-100 last:border-b-0 hover:bg-blue-50/50 transition-colors"
-                      >
-                        <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{record.repaymentDate}</td>
-                        <td className="px-3 py-3 text-right text-slate-900 whitespace-nowrap font-medium tabular-nums">
-                          {formatMoney(record.principal)}
-                        </td>
-                        <td className="px-3 py-3 text-right text-slate-900 whitespace-nowrap font-medium tabular-nums">
-                          {formatMoney(record.interest)}
-                        </td>
-                        <td className="px-3 py-3 text-right text-red-600 whitespace-nowrap font-bold tabular-nums">
-                          {formatMoney(record.totalAmount)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
+          ) : (
+            <>
               {/* Summary */}
-              <div className="border-t-2 border-blue-800 bg-slate-50 px-3 py-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-700">合计</span>
-                  <div className="text-right">
-                    <div className="flex gap-4 text-xs text-slate-500 mb-1">
-                      <span>本金: {formatMoney(summary.totalPrincipal)}</span>
-                      <span>利息: {formatMoney(summary.totalInterest)}</span>
-                    </div>
-                    <p className="text-lg font-bold text-red-600 tabular-nums">
-                      {formatMoney(summary.totalAmount)}
-                    </p>
+              <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-slate-100">
+                <h3 className="text-sm font-medium text-slate-700 mb-3">还款汇总</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="text-center">
+                    <p className="text-xs text-slate-500 mb-1">本金合计</p>
+                    <p className="text-sm font-bold text-slate-900">¥{formatMoney(summary.totalPrincipal)}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-500 mb-1">利息合计</p>
+                    <p className="text-sm font-bold text-slate-900">¥{formatMoney(summary.totalInterest)}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-slate-500 mb-1">总计</p>
+                    <p className="text-base font-bold text-[#dc2626]">¥{formatMoney(summary.totalAmount)}</p>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Detail List for Mobile */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-                <h3 className="text-sm font-semibold text-slate-700">还款明细</h3>
+              {/* Records */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-100">
+                  <h3 className="text-sm font-medium text-slate-700">
+                    还款明细（共 {matchedRecords.length} 期）
+                  </h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-100">
+                        <th className="px-3 py-2 text-left text-xs font-medium text-slate-500">期数</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-slate-500">还款日</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium text-slate-500">本金</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium text-slate-500">利息</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium text-slate-500">合计</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {matchedRecords.map((record, idx) => (
+                        <tr key={idx} className="border-b border-slate-50 hover:bg-blue-50/50 transition-colors">
+                          <td className="px-3 py-2 text-slate-900 font-medium">{record.period}</td>
+                          <td className="px-3 py-2 text-slate-600">{record.repaymentDate}</td>
+                          <td className="px-3 py-2 text-right text-slate-900">¥{formatMoney(record.principal)}</td>
+                          <td className="px-3 py-2 text-right text-slate-900">¥{formatMoney(record.interest)}</td>
+                          <td className="px-3 py-2 text-right font-bold text-[#dc2626]">¥{formatMoney(record.totalAmount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div className="divide-y divide-slate-100">
-                {matchedRecords.map((record: RepaymentRecord, index: number) => (
-                  <div key={index} className="px-4 py-3">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs text-slate-500">{record.repaymentDate}</span>
-                      <span className="text-base font-bold text-red-600 tabular-nums">
-                        {formatMoney(record.totalAmount)}
-                      </span>
-                    </div>
-                    {record.insuredNames && (
-                      <div className="text-xs text-slate-600 mb-1">
-                        <span className="text-slate-400">被保险人：</span>{record.insuredNames}
-                      </div>
-                    )}
-                    <div className="flex gap-4 text-xs text-slate-500">
-                      <span>本金: {formatMoney(record.principal)}</span>
-                      <span>利息: {formatMoney(record.interest)}</span>
-                    </div>
-                    {record.repaymentAccount && (
-                      <div className="text-xs text-slate-400 mt-1">
-                        还款账号: {record.repaymentAccount}
-                      </div>
-                    )}
-                  </div>
-                ))}
+
+              {/* Account Info */}
+              <div className="mt-4 bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <h3 className="text-sm font-medium text-blue-900 mb-2">还款账户信息</h3>
+                <div className="space-y-1 text-sm text-blue-800">
+                  <p><span className="text-blue-600">户名：</span>{batch.accountName || '-'}</p>
+                  <p><span className="text-blue-600">账号：</span>{batch.accountNumber || '-'}</p>
+                  <p><span className="text-blue-600">开户行：</span>{batch.bankName || '-'}</p>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Not Found */}
-        {hasSearched && notFound && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
-            <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <svg className="w-7 h-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-              </svg>
-            </div>
-            <p className="text-sm text-slate-600 mb-1">未找到相关还款记录</p>
-            <p className="text-xs text-slate-400">请确认企业名称是否正确，或联系管理员</p>
-          </div>
-        )}
-
-        {/* Footer */}
-        <p className="text-center text-xs text-slate-400 mt-8 pb-4">
-          还款计划查询系统
-        </p>
-      </main>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

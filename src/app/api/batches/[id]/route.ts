@@ -16,7 +16,7 @@ export async function GET(
     // 从 Supabase 查询
     const { data, error } = await supabase
       .from('repayment_batches')
-      .select('data')
+      .select('id, file_name, data, created_at')
       .eq('id', id)
       .single();
 
@@ -27,7 +27,11 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(data.data);
+    return NextResponse.json({
+      ...data.data,
+      fileName: data.file_name,
+      createdAt: data.created_at,
+    });
   } catch (error) {
     console.error('GET error:', error);
     return NextResponse.json(
