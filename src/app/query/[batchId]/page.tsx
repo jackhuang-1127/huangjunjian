@@ -210,27 +210,20 @@ export default function QueryPage() {
                     还款明细（共 {matchedRecords.length} 期）
                   </h3>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-100">
-                        <th className="px-3 py-2 text-left text-xs font-medium text-slate-500">还款日</th>
-                        <th className="px-3 py-2 text-right text-xs font-medium text-slate-500">本金</th>
-                        <th className="px-3 py-2 text-right text-xs font-medium text-slate-500">利息</th>
-                        <th className="px-3 py-2 text-right text-xs font-medium text-slate-500">合计</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {matchedRecords.map((record, idx) => (
-                        <tr key={idx} className="border-b border-slate-50 hover:bg-blue-50/50 transition-colors">
-                          <td className="px-3 py-2 text-slate-600">{record.repaymentDate}</td>
-                          <td className="px-3 py-2 text-right text-slate-900">¥{formatMoney(record.principal)}</td>
-                          <td className="px-3 py-2 text-right text-slate-900">¥{formatMoney(record.interest)}</td>
-                          <td className="px-3 py-2 text-right font-bold text-[#dc2626]">¥{formatMoney(record.totalAmount)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-3">
+                  {matchedRecords.map((record, idx) => (
+                    <div key={idx} className="bg-white border border-slate-200 rounded-lg p-3 hover:border-blue-300 transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-sm text-slate-600">{record.repaymentDate}</span>
+                        <span className="text-lg font-bold text-[#dc2626]">¥{formatMoney(record.totalAmount)}</span>
+                      </div>
+                      <div className="text-xs text-slate-500 space-y-1">
+                        <p>本金：{formatMoney(record.principal)}  利息：{formatMoney(record.interest)}</p>
+                        <p>还款账号：{record.repaymentAccount}</p>
+                        {record.insuredNames && <p>被保险人：{record.insuredNames}</p>}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
