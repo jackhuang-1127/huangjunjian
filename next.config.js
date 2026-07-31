@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   allowedDevOrigins: ['*.dev.coze.site'],
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
