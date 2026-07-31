@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { BatchData } from './types';
 
-// 从环境变量读取 Supabase 配置
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Supabase 配置（直接硬编码，因为 Gitee Pages 不支持构建时环境变量）
+const supabaseUrl = 'https://ljebrvptuzkyvbiubcyc.supabase.co';
+const supabaseAnonKey = 'sb_publishable_Mvj6_yzjRcXpK49tgOkPDA_MAmc4h1f';
 
 // 创建 Supabase 客户端
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
