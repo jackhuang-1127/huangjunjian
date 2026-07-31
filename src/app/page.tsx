@@ -61,6 +61,9 @@ export default function AdminPage() {
           createdAt: Date.now(),
           records: result.records,
           fileName: file.name,
+          accountName: result.accountName,
+          accountNumber: result.accountNumber,
+          bankName: result.bankName,
         };
 
         // 上传到服务端

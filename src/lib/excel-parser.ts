@@ -54,6 +54,9 @@ export function parseExcelFile(file: File): Promise<ParseResult> {
         const records: RepaymentRecord[] = [];
         const uniqueCompanies = new Set<string>();
         const errors: string[] = [];
+        let accountName = '';
+        let accountNumber = '';
+        const bankName = '宁波银行股份有限公司';
 
         for (let i = 1; i < jsonData.length; i++) {
           const row = jsonData[i];
@@ -66,6 +69,12 @@ export function parseExcelFile(file: File): Promise<ParseResult> {
           const interest = parseNumber(row[4]);
           const totalAmount = parseNumber(row[5]);
           const repaymentDate = parseDate(row[6]);
+
+          // 提取第一个记录的账户信息
+          if (i === 1 && borrowerName && repaymentAccount) {
+            accountName = borrowerName;
+            accountNumber = repaymentAccount;
+          }
 
           if (!borrowerName && !insuredNames) {
             errors.push(`第${i + 1}行：借款人客户名称和被保险人都为空，已跳过`);
@@ -92,7 +101,14 @@ export function parseExcelFile(file: File): Promise<ParseResult> {
           }
         }
 
-        resolve({ records, uniqueCompanies, errors });
+        resolve({
+          records,
+          uniqueCompanies,
+          errors,
+          accountName,
+          accountNumber,
+          bankName,
+        });
       } catch (err) {
         reject(new Error(`Excel解析失败: ${err instanceof Error ? err.message : '未知错误'}`));
       }
