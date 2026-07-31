@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { BatchData } from '@/lib/types';
+import { createClient } from '@supabase/supabase-js';
 
-// In-memory store for batch data
-const batchStore = new Map<string, BatchData>();
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,18 +17,33 @@ export async function POST(request: NextRequest) {
       fileName: body.fileName,
     };
 
-    batchStore.set(batch.id, batch);
+    // 存储到 Supabase
+    const { error } = await supabase
+      .from('repayment_batches')
+      .insert({
+        id: batch.id,
+        file_name: batch.fileName,
+        data: batch,
+        created_at: batch.createdAt,
+      });
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+      return NextResponse.json(
+        { error: '存储失败' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       batchId: batch.id,
     });
   } catch (error) {
+    console.error('POST error:', error);
     return NextResponse.json(
       { error: '存储失败' },
       { status: 500 }
     );
   }
 }
-
-export { batchStore };
