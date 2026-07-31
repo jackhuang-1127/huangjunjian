@@ -10,7 +10,7 @@ export interface RepaymentRecord {
 
 export interface BatchData {
   id: string;
-  createdAt: string;
+  createdAt: number;
   records: RepaymentRecord[];
   fileName: string;
   accountName?: string;
