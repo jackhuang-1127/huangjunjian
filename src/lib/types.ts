@@ -22,4 +22,7 @@ export interface ParseResult {
   records: RepaymentRecord[];
   uniqueCompanies: Set<string>;
   errors: string[];
+  accountName?: string;
+  accountNumber?: string;
+  bankName?: string;
 }
