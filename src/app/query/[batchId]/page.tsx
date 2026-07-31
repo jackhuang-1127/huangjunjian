@@ -184,6 +184,16 @@ export default function QueryPage() {
             </div>
           ) : (
             <>
+              {/* Account Info - 移到汇总上方 */}
+              <div className="mb-4 bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <h3 className="text-sm font-medium text-blue-900 mb-2">还款账户信息</h3>
+                <div className="space-y-1 text-sm text-blue-800">
+                  <p><span className="text-blue-600">户名：</span>{batch.accountName || '-'}</p>
+                  <p><span className="text-blue-600">账号：</span>{batch.accountNumber || '-'}</p>
+                  <p><span className="text-blue-600">开户行：</span>{batch.bankName || '-'}</p>
+                </div>
+              </div>
+
               {/* Summary */}
               <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-slate-100">
                 <h3 className="text-sm font-medium text-slate-700 mb-3">还款汇总</h3>
@@ -224,16 +234,6 @@ export default function QueryPage() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              {/* Account Info */}
-              <div className="mt-4 bg-blue-50 rounded-xl p-4 border border-blue-100">
-                <h3 className="text-sm font-medium text-blue-900 mb-2">还款账户信息</h3>
-                <div className="space-y-1 text-sm text-blue-800">
-                  <p><span className="text-blue-600">户名：</span>{batch.accountName || '-'}</p>
-                  <p><span className="text-blue-600">账号：</span>{batch.accountNumber || '-'}</p>
-                  <p><span className="text-blue-600">开户行：</span>{batch.bankName || '-'}</p>
                 </div>
               </div>
             </>
