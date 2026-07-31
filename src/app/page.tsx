@@ -17,7 +17,8 @@ export default function AdminPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const generateQR = useCallback(async (batchId: string) => {
-    const domain = process.env.NEXT_PUBLIC_DOMAIN || window.location.origin;
+    // Gitee Pages 域名（硬编码）
+    const domain = 'https://huang-junjian1127.gitee.io/repayment-query';
     const queryUrl = `${domain}/query/${batchId}`;
     try {
       const url = await QRCode.toDataURL(queryUrl, {
