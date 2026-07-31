@@ -22,7 +22,7 @@ export default function QueryPage() {
       if (data) {
         setBatch(data);
         setFileName(data.fileName || '');
-        setCreatedAt(data.createdAt || '');
+        setCreatedAt(data.createdAt ? new Date(data.createdAt).toLocaleString('zh-CN') : '');
       }
       setIsLoading(false);
     });
