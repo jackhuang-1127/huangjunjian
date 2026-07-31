@@ -214,7 +214,6 @@ export default function QueryPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-100">
-                        <th className="px-3 py-2 text-left text-xs font-medium text-slate-500">期数</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-slate-500">还款日</th>
                         <th className="px-3 py-2 text-right text-xs font-medium text-slate-500">本金</th>
                         <th className="px-3 py-2 text-right text-xs font-medium text-slate-500">利息</th>
@@ -224,7 +223,6 @@ export default function QueryPage() {
                     <tbody>
                       {matchedRecords.map((record, idx) => (
                         <tr key={idx} className="border-b border-slate-50 hover:bg-blue-50/50 transition-colors">
-                          <td className="px-3 py-2 text-slate-900 font-medium">{record.period}</td>
                           <td className="px-3 py-2 text-slate-600">{record.repaymentDate}</td>
                           <td className="px-3 py-2 text-right text-slate-900">¥{formatMoney(record.principal)}</td>
                           <td className="px-3 py-2 text-right text-slate-900">¥{formatMoney(record.interest)}</td>
