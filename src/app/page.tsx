@@ -2,7 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { parseExcelFile } from '@/lib/excel-parser';
-import { generateBatchId, uploadBatchToServer } from '@/lib/storage';
+import { generateBatchId } from '@/lib/storage';
+import { saveBatchToSupabase } from '@/lib/supabase-client';
 import type { BatchData, ParseResult } from '@/lib/types';
 import QRCode from 'qrcode';
 
@@ -66,10 +67,10 @@ export default function AdminPage() {
           bankName: result.bankName,
         };
 
-        // 上传到服务端
-        const uploaded = await uploadBatchToServer(batchData);
-        if (!uploaded) {
-          setError('数据上传失败，请重试');
+        // 保存到 Supabase
+        const result = await saveBatchToSupabase(batchData);
+        if (!result.success) {
+          setError('数据上传失败：' + (result.error || '未知错误'));
           setIsUploading(false);
           return;
         }

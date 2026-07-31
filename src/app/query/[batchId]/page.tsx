@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { fetchBatchFromServer } from '@/lib/storage';
+import { getBatchFromSupabase } from '@/lib/supabase-client';
 import type { BatchData, RepaymentRecord } from '@/lib/types';
 
 export default function QueryPage() {
@@ -18,7 +18,7 @@ export default function QueryPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchBatchFromServer(batchId).then((data) => {
+    getBatchFromSupabase(batchId).then((data) => {
       if (data) {
         setBatch(data);
         setFileName(data.fileName || '');
